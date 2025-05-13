@@ -256,11 +256,11 @@
   import { useStore } from 'vuex';
   import moment from 'moment';
   import PageHeader from '@/components/common/PageHeader.vue';
-  import { Pie as PieChart, Bar as BarChart } from 'vue-chartjs';
-  import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+  import { PieChart, BarChart } from '@/services/chart-components'; // Import the chart components we created
+
   
-  // Register Chart.js components
-  ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+  // // Register Chart.js components
+  // ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
   
   export default {
     name: 'Dashboard',
@@ -283,6 +283,22 @@
       const vehicleStatusDistribution = ref([]);
       const vehicleTypeDistribution = ref([]);
       const recentBookings = ref([]);
+
+          // Default chart data to prevent undefined errors
+    const defaultChartData = {
+      labels: [],
+      datasets: [
+        {
+          label: 'No Data',
+          data: [0],
+          backgroundColor: ['rgba(200, 200, 200, 0.5)'],
+          borderColor: ['rgba(200, 200, 200, 1)'],
+          borderWidth: 1
+        }
+      ]
+    };
+
+      
       
       // Computed properties for charts
       const vehicleStatusData = computed(() => {
@@ -309,6 +325,11 @@
       });
       
       const vehicleTypeData = computed(() => {
+        if (!vehicleTypeDistribution.value || vehicleTypeDistribution.value.length === 0) {
+          console.log('ini pake data default')
+        return defaultChartData;
+      }
+      
         return {
           labels: vehicleTypeDistribution.value.map(item => item.type),
           datasets: [
@@ -328,6 +349,10 @@
         loading.value = true;
         
         try {
+
+          console.log('Fetching dashboard data...');
+          console.log('Auth token present:', !!localStorage.getItem('token'));
+
           // Fetch dashboard statistics
           const statsResponse = await store.dispatch('dashboard/fetchStats');
           stats.value = statsResponse;
@@ -340,9 +365,22 @@
           // Fetch recent bookings
           const bookingsResponse = await store.dispatch('dashboard/fetchRecentBookings');
           recentBookings.value = bookingsResponse;
+
+          console.log('Dashboard data loaded successfully');
+
         } catch (error) {
           console.error('Error fetching dashboard data:', error);
+
+
+        // Check for authentication errors
+        if (error.response && error.response.status === 401) {
+          console.log('Authentication error detected, redirecting to login');
+          await store.dispatch('auth/logout');
+        } else {
           store.dispatch('setError', 'Error loading dashboard data');
+        }
+
+
         } finally {
           loading.value = false;
         }
@@ -370,3 +408,5 @@
     }
   };
   </script>
+
+  <!-- src/views/Dashboard.vue -->

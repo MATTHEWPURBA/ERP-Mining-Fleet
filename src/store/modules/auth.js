@@ -25,7 +25,9 @@ const getters = {
   user: state => state.user,
   // Role-based access control helpers
   isAdmin: state => state.user && state.user.role === 'Administrator',
-  isApprover: state => state.user && (state.user.role === 'Administrator' || state.user.role === 'Approver')
+  isApprover: state => state.user && (state.user.role === 'Administrator' || state.user.role === 'Approver'),
+  // Add this getter to expose the token directly for API calls
+  token: state => state.token
 };
 
 // Actions
@@ -40,6 +42,14 @@ const actions = {
       // Extract token and user data
       const { access_token, user } = response.data;
       
+
+      if (!access_token) {
+        throw new Error('No token received from server');
+      }
+      
+      console.log('Login successful, received token:', access_token.substring(0, 10) + '...');
+      
+
       // Store token in localStorage
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
@@ -54,19 +64,21 @@ const actions = {
       
       return Promise.resolve(response);
     } catch (error) {
+      console.error('Login error:', error);
       commit('AUTH_ERROR');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
       // Display error in global store
-      dispatch('setError', error.response?.data?.message || 'Authentication failed', { root: true });
-      
+      const errorMessage = error.response?.data?.message || 'Authentication failed';
+      dispatch('setError', errorMessage, { root: true });
       return Promise.reject(error);
     }
   },
   
   // Logout action
   async logout({ commit }) {
+    console.log('Logout action initiated');
     try {
       await AuthService.logout();
     } catch (error) {
@@ -87,6 +99,8 @@ const actions = {
   // Fetch current user profile
   async fetchCurrentUser({ commit, dispatch }) {
     try {
+      console.log('Fetching current user profile');
+
       const response = await AuthService.getCurrentUser();
       const user = response.data;
       
@@ -99,6 +113,7 @@ const actions = {
       
       // If 401 Unauthorized, logout user
       if (error.response && error.response.status === 401) {
+        console.log('Unauthorized response when fetching user, logging out');
         dispatch('logout');
       }
       

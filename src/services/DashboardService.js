@@ -3,8 +3,9 @@ import ApiService from './ApiService';
 const DashboardService = {
   /**
    * Get dashboard statistics
+   * Fetches summary statistics for the dashboard including vehicle counts, booking counts, etc.
    * 
-   * @returns {Promise} - API response
+   * @returns {Promise} - API response with statistics data
    */
   getStats() {
     return ApiService.get('/dashboard/stats');
@@ -84,3 +85,6 @@ const DashboardService = {
 };
 
 export default DashboardService;
+
+
+// src/services/DashboardService.js
