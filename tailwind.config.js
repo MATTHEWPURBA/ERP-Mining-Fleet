@@ -1,16 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 // tailwind.config.js
 module.exports = {
-  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class', // or 'media' for dark mode based on system preference
   theme: {
     extend: {
       colors: {
-        // Mining-themed color palette
-        primary: '#1F2937',
-        secondary: '#F59E0B',
-        accent: '#10B981'
+        // You can customize your color palette here
+      },
+      spacing: {
+        // Custom spacing if needed
+      },
+      fontFamily: {
+        // Custom fonts if needed
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')
+  ],
 }
