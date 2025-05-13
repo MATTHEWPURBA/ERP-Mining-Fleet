@@ -2,9 +2,8 @@ import store from '@/store';
 
 /**
  * Auth guard for protecting routes
- * @param {Object} to - Target route
- * @param {Object} from - Current route
- * @param {Function} next - Navigation function
+ * @param {Object} store - Vuex store
+ * @returns {Function} - Route guard function
  */
 export const authGuard = (to, from, next) => {
     const isAuthenticated = store.getters['auth/isAuthenticated'];
@@ -46,3 +45,51 @@ export const authGuard = (to, from, next) => {
       next();
     }
   };
+
+
+  export const createAuthGuard = (store) => {
+    // Return a function that takes the route parameters
+    return (to, from, next) => {
+      // Check if the store and auth module are properly initialized
+      if (!store || !store.hasModule('auth')) {
+        console.warn('Auth module not ready yet, allowing navigation');
+        next();
+        return;
+      }
+      
+      const isAuthenticated = store.getters['auth/isAuthenticated'];
+      const isAdmin = store.getters['auth/isAdmin'];
+      const isApprover = store.getters['auth/isApprover'];
+      
+      // Rest of your existing logic...
+      if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!isAuthenticated) {
+          next({
+            path: '/login',
+            query: { redirect: to.fullPath }
+          });
+          return;
+        }
+        
+        if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
+          next({ path: '/' });
+          return;
+        }
+        
+        if (to.matched.some(record => record.meta.requiresApprover) && !isApprover) {
+          next({ path: '/' });
+          return;
+        }
+        
+        next();
+      } else if (to.path === '/login' && isAuthenticated) {
+        next({ path: '/' });
+      } else {
+        next();
+      }
+    };
+  };
+  
+
+
+  // src/utils/auth.js

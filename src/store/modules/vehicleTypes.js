@@ -73,7 +73,7 @@ const actions = {
   },
   
   // Update an existing vehicle type
-  async updateVehicleType({ commit, dispatch }, { id, vehicleTypeData }) {
+  async updateVehicleType({ commit, dispatch, state }, { id, vehicleTypeData }) {
     commit('SET_LOADING', true);
     
     try {
@@ -150,3 +150,5 @@ export default {
   actions,
   mutations
 };
+
+// src/store/modules/vehicleTypes.js

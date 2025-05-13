@@ -1,22 +1,31 @@
 import AuthService from '@/services/AuthService';
 import router from '@/router';
 
-// Initial state
+
+// Initial state with localStorage persistence for session handling
+// This ensures authentication state persists across page refreshes
 const initialState = {
+  // Retrieve token from localStorage if available, otherwise null
   token: localStorage.getItem('token') || null,
+  // Parse user data from localStorage if available, otherwise null
+  // JSON.parse can handle null values safely when localStorage item doesn't exist
   user: JSON.parse(localStorage.getItem('user')) || null,
+  // Authentication process status tracking ('', 'loading', 'success', 'error')
   status: ''
 };
 
-// Getters
+// Getters provide computed properties from the store state
+// These are accessible throughout the application via store.getters
 const getters = {
+  // Convert token to boolean - if token exists, user is authenticated
   isAuthenticated: state => !!state.token,
+  // Expose the current authentication status for UI indicators
   authStatus: state => state.status,
+  // Provide access to the user object containing profile information
   user: state => state.user,
-  token: state => state.token,
+  // Role-based access control helpers
   isAdmin: state => state.user && state.user.role === 'Administrator',
-  isApprover: state => state.user && (state.user.role === 'Administrator' || state.user.role === 'Approver'),
-  userRole: state => state.user ? state.user.role : null
+  isApprover: state => state.user && (state.user.role === 'Administrator' || state.user.role === 'Approver')
 };
 
 // Actions
@@ -130,3 +139,7 @@ export default {
   actions,
   mutations
 };
+
+
+
+// src/store/modules/auth.js

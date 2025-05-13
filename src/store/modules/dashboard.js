@@ -223,7 +223,7 @@ const mutations = {
   SET_FUEL_CONSUMPTION(state, consumption) {
     state.fuelConsumption = consumption;
   },
-  SET_USER_BOOKINGS(state, bclookings) {
+  SET_USER_BOOKINGS(state, bookings) {
     state.userBookings = bookings;
   },
   SET_USER_PENDING_APPROVALS(state, approvals) {
@@ -250,3 +250,5 @@ export default {
   actions,
   mutations,
 };
+
+// src/store/modules/dashboard.js
