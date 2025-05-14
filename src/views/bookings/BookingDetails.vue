@@ -10,3 +10,6 @@
     name: 'BookingDetailsView'
   }
   </script>
+
+
+  <!-- src/views/bookings/BookingDetails.vue -->

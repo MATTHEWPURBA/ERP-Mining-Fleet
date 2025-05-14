@@ -10,3 +10,5 @@
     name: 'BookingApprovalsView'
   }
   </script>
+
+  <!-- src/views/bookings/BookingApprovals.vue -->

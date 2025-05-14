@@ -81,3 +81,5 @@ const BookingService = {
 };
 
 export default BookingService;
+
+// src/services/BookingService.js

@@ -319,3 +319,6 @@
     }
   };
   </script>
+
+
+  <!-- src/views/bookings/BookingCreate.vue -->

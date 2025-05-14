@@ -260,3 +260,5 @@ const router = createRouter({
 });
 
 export default router;
+
+// src/router/index.js

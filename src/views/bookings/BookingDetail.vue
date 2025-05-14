@@ -364,3 +364,6 @@ export default {
   },
 };
 </script>
+
+
+  <!-- src/views/bookings/BookingDetail.vue -->

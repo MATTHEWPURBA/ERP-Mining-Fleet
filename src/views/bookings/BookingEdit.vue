@@ -382,3 +382,5 @@
     }
   };
   </script>
+
+  <!-- src/views/bookings/BookingEdit.vue -->

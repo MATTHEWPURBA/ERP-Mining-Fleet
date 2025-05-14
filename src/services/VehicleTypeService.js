@@ -53,3 +53,7 @@ const VehicleTypeService = {
 };
 
 export default VehicleTypeService;
+
+
+
+// src/services/VehicleTypeService.js

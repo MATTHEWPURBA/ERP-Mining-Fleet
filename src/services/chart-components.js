@@ -58,3 +58,5 @@ export const BarChart = defineComponent({
     });
   }
 });
+
+// src/services/chart-components.js
