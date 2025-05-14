@@ -72,3 +72,5 @@ const initialState = {
     actions,
     mutations
   };
+
+  // src/store/modules/maintenance.js

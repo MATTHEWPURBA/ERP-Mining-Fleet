@@ -60,3 +60,5 @@ const initialState = {
     actions,
     mutations
   };
+
+  // src/store/modules/bookingApprovals.js

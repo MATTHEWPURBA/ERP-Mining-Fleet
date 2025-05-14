@@ -345,3 +345,6 @@ export default {
   actions,
   mutations,
 };
+
+
+// src/store/modules/bookings.js

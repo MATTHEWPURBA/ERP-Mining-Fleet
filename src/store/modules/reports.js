@@ -67,3 +67,5 @@ const initialState = {
     actions,
     mutations
   };
+
+// src/store/modules/reports.js

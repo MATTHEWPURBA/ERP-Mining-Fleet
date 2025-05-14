@@ -150,3 +150,5 @@ export default {
   actions,
   mutations
 };
+
+// src/store/modules/locations.js
