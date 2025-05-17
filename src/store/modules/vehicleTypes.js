@@ -5,15 +5,15 @@ const initialState = {
   vehicleTypes: [],
   vehicleType: null,
   loading: false,
-  error: null
+  error: null,
 };
 
 // Getters
 const getters = {
-  getAllVehicleTypes: state => state.vehicleTypes,
-  getVehicleType: state => state.vehicleType,
-  isLoading: state => state.loading,
-  getError: state => state.error
+  getAllVehicleTypes: (state) => state.vehicleTypes,
+  getVehicleType: (state) => state.vehicleType,
+  isLoading: (state) => state.loading,
+  getError: (state) => state.error,
 };
 
 // Actions
@@ -21,7 +21,7 @@ const actions = {
   // Fetch all vehicle types
   async fetchVehicleTypes({ commit, dispatch }) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleTypeService.getVehicleTypes();
       commit('SET_VEHICLE_TYPES', response.data);
@@ -35,11 +35,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Fetch a single vehicle type by ID
   async fetchVehicleType({ commit, dispatch }, id) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleTypeService.getVehicleType(id);
       commit('SET_VEHICLE_TYPE', response.data);
@@ -53,11 +53,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Create a new vehicle type
   async createVehicleType({ commit, dispatch }, vehicleTypeData) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleTypeService.createVehicleType(vehicleTypeData);
       dispatch('setSuccessMessage', 'Vehicle type created successfully', { root: true });
@@ -71,19 +71,19 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Update an existing vehicle type
   async updateVehicleType({ commit, dispatch, state }, { id, vehicleTypeData }) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleTypeService.updateVehicleType(id, vehicleTypeData);
-      
+
       // Update the vehicle type in state if it's the current one
       if (state.vehicleType && state.vehicleType.id === id) {
         commit('SET_VEHICLE_TYPE', response.data.vehicle_type);
       }
-      
+
       dispatch('setSuccessMessage', 'Vehicle type updated successfully', { root: true });
       return Promise.resolve(response.data);
     } catch (error) {
@@ -95,17 +95,17 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Delete a vehicle type
   async deleteVehicleType({ commit, dispatch }, id) {
     commit('SET_LOADING', true);
-    
+
     try {
       await VehicleTypeService.deleteVehicleType(id);
-      
+
       // Remove vehicle type from state
       commit('REMOVE_VEHICLE_TYPE', id);
-      
+
       dispatch('setSuccessMessage', 'Vehicle type deleted successfully', { root: true });
       return Promise.resolve();
     } catch (error) {
@@ -116,7 +116,7 @@ const actions = {
     } finally {
       commit('SET_LOADING', false);
     }
-  }
+  },
 };
 
 // Mutations
@@ -128,8 +128,8 @@ const mutations = {
     state.vehicleType = vehicleType;
   },
   REMOVE_VEHICLE_TYPE(state, id) {
-    state.vehicleTypes = state.vehicleTypes.filter(type => type.id !== id);
-    
+    state.vehicleTypes = state.vehicleTypes.filter((type) => type.id !== id);
+
     // Clear current vehicle type if it's the deleted one
     if (state.vehicleType && state.vehicleType.id === id) {
       state.vehicleType = null;
@@ -140,7 +140,7 @@ const mutations = {
   },
   SET_ERROR(state, error) {
     state.error = error;
-  }
+  },
 };
 
 export default {
@@ -148,7 +148,7 @@ export default {
   state: initialState,
   getters,
   actions,
-  mutations
+  mutations,
 };
 
 // src/store/modules/vehicleTypes.js

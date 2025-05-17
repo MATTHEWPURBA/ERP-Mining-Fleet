@@ -190,7 +190,10 @@ const actions = {
     
     try {
       const response = await VehicleService.checkAvailability(filters);
-      return Promise.resolve(response.data);
+          // Add logging to debug the response
+    console.log('API response for vehicle availability:', response);
+    // Ensure we're returning the data in a consistent format
+    return Promise.resolve(response.data || []);
     } catch (error) {
       commit('SET_ERROR', error.response?.data?.message || 'Failed to check vehicle availability');
       dispatch('setError', error.response?.data?.message || 'Failed to check vehicle availability', { root: true });
@@ -199,6 +202,9 @@ const actions = {
       commit('SET_LOADING', false);
     }
   }
+
+
+  
 };
 
 // Mutations
