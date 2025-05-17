@@ -19,7 +19,6 @@
   </div>
 </template>
 
-
 <script>
 import { computed, watch, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -33,7 +32,7 @@ export default {
   components: {
     AdminLayout,
     DefaultLayout,
-    AuthLayout
+    AuthLayout,
   },
   setup() {
     const store = useStore();
@@ -42,7 +41,7 @@ export default {
 
     // Use the route object meaningfully
     const currentPath = computed(() => route.path);
-    
+
     onMounted(() => {
       console.log('Current route path:', route.path);
       // Check if store is properly initialized
@@ -50,7 +49,7 @@ export default {
         storeReady.value = true;
       }
     });
-    
+
     // Check if user is authenticated by looking at the store, with fallback
     const isAuthenticated = computed(() => {
       if (!storeReady.value || !store || !store.getters) {
@@ -63,38 +62,38 @@ export default {
         return false;
       }
     });
-    
+
     // Define which routes use the admin layout
     const isAdminLayout = computed(() => {
-      const adminRoutes = [
-        'dashboard', 'users', 'vehicles', 'locations', 'reports', 'settings',
-        'vehicle-types', 'maintenance', 'fuel-logs', 'bookings'
-      ];
-      
+      const adminRoutes = ['dashboard', 'users', 'vehicles', 'locations', 'reports', 'settings', 'vehicle-types', 'maintenance', 'fuel-logs', 'bookings'];
+
       // Check if current route should use admin layout
-      return adminRoutes.some(route => route === route.name || route === route.name?.split('-')[0]);
+      return adminRoutes.some((route) => route === route.name || route === route.name?.split('-')[0]);
     });
-    
+
     // Only set up the watcher if store is ready
     if (store && store.getters) {
-      watch(isAuthenticated, (newValue) => {
-        if (newValue && store.getters['auth/user'] === undefined) {
-          store.dispatch('auth/fetchCurrentUser').catch(e => {
-            console.error('Error fetching user:', e);
-          });
-        }
-      }, { immediate: true });
+      watch(
+        isAuthenticated,
+        (newValue) => {
+          if (newValue && store.getters['auth/user'] === undefined) {
+            store.dispatch('auth/fetchCurrentUser').catch((e) => {
+              console.error('Error fetching user:', e);
+            });
+          }
+        },
+        { immediate: true }
+      );
     }
-    
+
     return {
       isAuthenticated,
       isAdminLayout,
       currentPath,
-      storeReady
+      storeReady,
     };
-  }
-}
+  },
+};
 </script>
-
 
 <!-- src/App.vue -->
