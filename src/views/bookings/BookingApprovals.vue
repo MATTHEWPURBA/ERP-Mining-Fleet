@@ -75,13 +75,33 @@
         <!-- Actions column with proper null checks -->
         <template #actions="{ item }">
           <div v-if="item" class="flex items-center space-x-2">
-            <button v-if="item.status === 'Pending'" @click.stop="openApprovalDialog(item, 'approve')" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300" title="Approve booking request">
+            <!-- Only show approve/reject buttons if user can approve this item -->
+            <button 
+              v-if="item.status === 'Pending' && canApprove(item)" 
+              @click.stop="openApprovalDialog(item, 'approve')" 
+              class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300" 
+              title="Approve booking request"
+            >
               <span class="material-icons text-sm">check_circle</span>
             </button>
 
-            <button v-if="item.status === 'Pending'" @click.stop="openApprovalDialog(item, 'reject')" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300" title="Reject booking request">
+            <button 
+              v-if="item.status === 'Pending' && canApprove(item)" 
+              @click.stop="openApprovalDialog(item, 'reject')" 
+              class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300" 
+              title="Reject booking request"
+            >
               <span class="material-icons text-sm">cancel</span>
             </button>
+
+            <!-- Show waiting message if approval is not yet eligible -->
+            <span 
+              v-if="item.status === 'Pending' && !canApprove(item)" 
+              class="text-gray-500 dark:text-gray-400 text-xs italic"
+              title="Waiting for previous approval level"
+            >
+              Awaiting previous level
+            </span>
 
             <router-link v-if="item.booking && item.booking.id" :to="`/bookings/${item.booking.id}`" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300" title="View booking details">
               <span class="material-icons text-sm">visibility</span>
@@ -183,9 +203,9 @@ export default {
     const router = useRouter();
 
     // Reactive state with initializations to prevent undefined errors
-    const loading = ref(true); // Start with loading=true to prevent premature rendering
+    const loading = ref(true); 
     const error = ref(null);
-    const approvals = ref([]); // Initialize as empty array
+    const approvals = ref([]);
     const activeTab = ref('pending');
     const showDialog = ref(false);
     const selectedApproval = ref(null);
@@ -220,24 +240,107 @@ export default {
       { label: 'All', value: 'all', count: counts.value.all },
     ]);
 
-    // Enhanced filteredApprovals with safety check
+    // Get current user info from store
+    const currentUser = computed(() => store.getters['auth/user'] || {});
+
+    /**
+     * Determines if the current user can approve a specific booking
+     * Implements sequential approval workflow logic
+     */
+    const canApprove = (approval) => {
+      if (!approval || !currentUser.value) return false;
+
+      // If user is explicitly assigned as the approver for this approval
+      if (approval.approver_id === currentUser.value.id) {
+        // For level 1 approvers, they can always approve if assigned
+        if (approval.level === 1) {
+          return true;
+        }
+        
+        // For level 2+ approvers, they need to verify previous levels are approved
+        return hasAllPreviousLevelsApproved(approval);
+      }
+
+      // Admin role is not specifically handled as they should only see
+      // approvals explicitly assigned to them or ones that are ready for their level
+      return false;
+    };
+
+    /**
+     * Checks if all previous approval levels for a booking have been approved
+     */
+    const hasAllPreviousLevelsApproved = (approval) => {
+      if (!approval || !approval.booking_id || !Array.isArray(approvals.value)) {
+        return false;
+      }
+
+      const currentLevel = approval.level;
+      if (currentLevel <= 1) return true; // Level 1 has no previous levels
+
+      // Find all approvals for this booking
+      const bookingApprovals = approvals.value.filter(a => a.booking_id === approval.booking_id);
+      
+      // Check all previous levels
+      for (let level = 1; level < currentLevel; level++) {
+        const previousLevelApproval = bookingApprovals.find(a => a.level === level);
+        
+        // If previous level doesn't exist or isn't approved, then false
+        if (!previousLevelApproval || previousLevelApproval.status !== 'Approved') {
+          return false;
+        }
+      }
+      
+      return true;
+    };
+
+    /**
+     * Filters approvals based on the selected tab and ensures they're accessible
+     * to the current user based on role and sequential approval workflow
+     */
     const filteredApprovals = computed(() => {
-      // Make sure approvals is defined and has items
       if (!approvals.value || !Array.isArray(approvals.value)) {
         return [];
       }
 
-      if (activeTab.value === 'all') {
-        return approvals.value;
+      let result = approvals.value;
+
+      // First, filter by the active tab
+      if (activeTab.value !== 'all') {
+        result = result.filter(
+          (approval) => approval && approval.status && approval.status.toLowerCase() === activeTab.value
+        );
       }
 
-      // Add safety check for item.status
-      return approvals.value.filter((approval) => approval && approval.status && approval.status.toLowerCase() === activeTab.value);
+      // For administrators, only show approvals that are either:
+      // 1. Directly assigned to them, or
+      // 2. Ready for them to approve (all previous levels are approved)
+      if (currentUser.value.role === 'Administrator') {
+        result = result.filter(approval => {
+          // Show if directly assigned to this admin
+          if (approval.approver_id === currentUser.value.id) {
+            return true;
+          }
+          
+          // Show if it's a level 2+ approval and all previous levels are approved
+          if (approval.level > 1 && approval.status === 'Pending') {
+            return hasAllPreviousLevelsApproved(approval);
+          }
+          
+          // Hide all other approvals
+          return false;
+        });
+      } 
+      // For approvers, only show approvals assigned to them
+      else if (currentUser.value.role === 'Approver') {
+        result = result.filter(approval => approval.approver_id === currentUser.value.id);
+      }
+
+      return result;
     });
 
     const emptyStateMessage = computed(() => {
       if (activeTab.value === 'pending') {
-        return 'There are no pending approval requests at this time.';
+        return 'There are no pending approval requests for you at this time.';
       } else if (activeTab.value === 'approved') {
         return 'There are no approved requests matching your criteria.';
       } else if (activeTab.value === 'rejected') {
@@ -247,13 +350,17 @@ export default {
       }
     });
 
-    // Methods
+    /**
+     * Fetches approval requests from the API
+     * For correct sequential workflow functionality, we need to fetch ALL approvals
+     * but will filter the display based on the user's role and the sequential logic
+     */
     const fetchApprovals = async () => {
       loading.value = true;
       error.value = null;
 
       try {
-        // Fetch approvals from API through Vuex store
+        // Fetch all approvals - we need the complete set to determine sequential approval status
         const response = await store.dispatch('bookingApprovals/fetchApprovals');
 
         // Validate response structure
@@ -261,14 +368,16 @@ export default {
           throw new Error('Received invalid data format from server');
         }
 
+        // Store the full list of approvals for reference and processing
         approvals.value = response;
 
-        // Count approvals by status
+        // Count approvals relevant to the current user
+        const userApprovals = filterApprovalsForCurrentUser(response);
         counts.value = {
-          pending: approvals.value.filter((a) => a && a.status === 'Pending').length,
-          approved: approvals.value.filter((a) => a && a.status === 'Approved').length,
-          rejected: approvals.value.filter((a) => a && a.status === 'Rejected').length,
-          all: approvals.value.length,
+          pending: userApprovals.filter((a) => a && a.status === 'Pending').length,
+          approved: userApprovals.filter((a) => a && a.status === 'Approved').length,
+          rejected: userApprovals.filter((a) => a && a.status === 'Rejected').length,
+          all: userApprovals.length,
         };
       } catch (err) {
         console.error('Error in fetchApprovals:', err);
@@ -277,6 +386,55 @@ export default {
       } finally {
         loading.value = false;
       }
+    };
+
+    /**
+     * Filters approvals to only show those relevant to the current user
+     * This is used for counting approvals, to ensure the counts reflect
+     * only those approvals that will be displayed to the user
+     */
+    const filterApprovalsForCurrentUser = (allApprovals) => {
+      if (!Array.isArray(allApprovals) || !currentUser.value) {
+        return [];
+      }
+
+      // For administrators, only include:
+      // 1. Directly assigned approvals
+      // 2. Level 2+ approvals where all previous levels are approved
+      if (currentUser.value.role === 'Administrator') {
+        return allApprovals.filter(approval => {
+          // Directly assigned
+          if (approval.approver_id === currentUser.value.id) {
+            return true;
+          }
+          
+          // Level 2+ with previous levels approved
+          if (approval.level > 1 && approval.status === 'Pending') {
+            // Need to check if all previous levels are approved
+            // Find all approvals for this booking
+            const bookingApprovals = allApprovals.filter(a => a.booking_id === approval.booking_id);
+            
+            // Check previous levels
+            for (let level = 1; level < approval.level; level++) {
+              const previousApproval = bookingApprovals.find(a => a.level === level);
+              if (!previousApproval || previousApproval.status !== 'Approved') {
+                return false;
+              }
+            }
+            
+            return true;
+          }
+          
+          return false;
+        });
+      } 
+      // For approvers, only show approvals assigned to them
+      else if (currentUser.value.role === 'Approver') {
+        return allApprovals.filter(approval => approval.approver_id === currentUser.value.id);
+      }
+      
+      // For other roles, show nothing
+      return [];
     };
 
     const formatDate = (dateString) => {
@@ -290,17 +448,20 @@ export default {
     };
 
     const viewBookingDetails = (approval) => {
-      // Add safety check before navigation
       if (approval && approval.booking && approval.booking.id) {
         router.push(`/bookings/${approval.booking.id}`);
       } else {
-        console.error('Cannot navigate to booking details: Invalid booking ID', approval);
-        // Optionally show an error message to the user
         store.dispatch('setError', 'Unable to view booking details - Invalid booking data');
       }
     };
 
     const openApprovalDialog = (approval, action) => {
+      // Verify approval eligibility
+      if (!canApprove(approval)) {
+        store.dispatch('setError', 'You cannot process this approval at this time. Previous approval levels must be completed first.');
+        return;
+      }
+
       selectedApproval.value = approval;
       dialogAction.value = action;
       approvalComments.value = '';
@@ -313,13 +474,19 @@ export default {
         return;
       }
 
+      // Final verification before submission
+      if (!canApprove(selectedApproval.value)) {
+        store.dispatch('setError', 'You cannot process this approval at this time. Previous approval levels must be completed first.');
+        showDialog.value = false;
+        return;
+      }
+
       processingApproval.value = true;
 
       try {
         const approvalId = selectedApproval.value.id;
         const comments = approvalComments.value;
 
-        // Use actual API calls through Vuex store actions
         if (dialogAction.value === 'approve') {
           await store.dispatch('bookingApprovals/approveBooking', {
             id: approvalId,
@@ -334,7 +501,7 @@ export default {
           store.dispatch('setSuccessMessage', 'Booking request rejected successfully');
         }
 
-        // Refresh approvals list after successful action
+        // Refresh the full list of approvals
         await fetchApprovals();
 
         showDialog.value = false;
@@ -347,10 +514,11 @@ export default {
       }
     };
 
-    // Lifecycle hooks
+    // Initialize component
     onMounted(() => {
       fetchApprovals();
     });
+
     return {
       loading,
       error,
@@ -369,9 +537,10 @@ export default {
       formatDate,
       viewBookingDetails,
       openApprovalDialog,
-      submitApprovalDecision
+      submitApprovalDecision,
+      canApprove,
+      hasAllPreviousLevelsApproved
     };
   },
 };
 </script>
-<!-- src/views/bookings/BookingApprovals.vue -->
