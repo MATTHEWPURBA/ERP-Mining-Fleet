@@ -15,7 +15,7 @@ import VehicleTypes from '../views/vehicles/VehicleTypes.vue';
 
 // Booking Views
 import BookingList from '../views/bookings/BookingList.vue';
-import BookingDetails from '../views/bookings/BookingDetails.vue';
+import BookingDetail from '../views/bookings/BookingDetail.vue';
 import BookingCreate from '../views/bookings/BookingCreate.vue';
 import BookingEdit from '../views/bookings/BookingEdit.vue';
 import BookingApprovals from '../views/bookings/BookingApprovals.vue';
@@ -113,7 +113,7 @@ const routes = [
   {
     path: '/bookings/:id',
     name: 'booking-details',
-    component: BookingDetails,
+    component: BookingDetail,
     meta: { requiresAuth: true }
   },
   {
