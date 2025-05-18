@@ -1,10 +1,10 @@
-// src/store/modules/bookingApprovals.js
+import BookingApprovalService from '@/services/BookingApprovalService';
 
 // Initial placeholder for booking approvals module
 // This provides the minimal structure needed to prevent import errors
 
 // Initial state with empty values
-const initialState = {
+const state = {
     approvals: [],
     pendingApprovals: [],
     loading: false,
@@ -13,39 +13,99 @@ const initialState = {
   
   // Basic getters matching the expected interface
   const getters = {
-    getAllApprovals: state => state.approvals,
-    getPendingApprovals: state => state.pendingApprovals,
+    getAllApprovals: state => state.approvals || [], // Safe fallback
+    getApprovals: state => state.pendingApprovals,
     isLoading: state => state.loading,
     getError: state => state.error
   };
   
   // Placeholder actions that can be implemented later
   const actions = {
-    // These empty actions will be filled with actual implementation later
-    fetchApprovals({ commit }) {
-      // Placeholder for fetchApprovals implementation
-      console.warn('fetchApprovals action not implemented yet');
-    },
-    approveBooking({ commit }, { id, data }) {
-      // Placeholder for approveBooking implementation
-      console.warn('approveBooking action not implemented yet');
-    },
-    rejectBooking({ commit }, { id, data }) {
-      // Placeholder for rejectBooking implementation
-      console.warn('rejectBooking action not implemented yet');
+  // Fetch all approvals with optional filters
+  async fetchApprovals({ commit }, filters = {}) {
+    commit('SET_LOADING', true);
+    commit('SET_ERROR', null);
+    
+    try {
+      const response = await BookingApprovalService.getApprovals();
+      commit('SET_APPROVALS', response.data);
+      return Promise.resolve(response.data);
+    } catch (error) {
+
+      // Set error message and return empty array for safety
+      const errorMessage = error.response?.data?.message || 'Failed to fetch approvals';
+      commit('SET_ERROR', errorMessage);
+      commit('SET_APPROVALS', []); // Set empty array to prevent undefined errors
+      
+      return Promise.reject(error);
+
+
+    } finally {
+      commit('SET_LOADING', false);
     }
+  },
+  
+  // Approve a booking request
+  async approveBooking({ commit, dispatch }, { id, data = {} }) {
+    commit('SET_LOADING', true);
+    
+    try {
+      // Validate input
+      if (!id) {
+        throw new Error('Approval ID is required');
+      }
+      
+      // Call API
+      const response = await BookingApprovalService.approveBooking(id, data);
+      
+      // Refresh the approvals list
+      dispatch('fetchApprovals');
+      
+      return Promise.resolve(response.data);
+    } catch (error) {
+      console.error('Error in approveBooking action:', error);
+      commit('SET_ERROR', error.response?.data?.message || 'Failed to approve booking');
+      return Promise.reject(error);
+    } finally {
+      commit('SET_LOADING', false);
+    }
+  },
+  
+  // Reject a booking request
+  async rejectBooking({ commit, dispatch }, { id, data = {} }) {
+    commit('SET_LOADING', true);
+    
+    try {
+      // Validate input
+      if (!id) {
+        throw new Error('Approval ID is required');
+      }
+      
+      const response = await BookingApprovalService.rejectBooking(id, data);
+      dispatch('fetchApprovals'); // Refresh the list
+      return Promise.resolve(response.data);
+    } catch (error) {
+      console.error('Error in rejectBooking action:', error);
+      commit('SET_ERROR', error.response?.data?.message || 'Failed to reject booking');
+      return Promise.reject(error);
+    } finally {
+      commit('SET_LOADING', false);
+    }
+  }
   };
   
   // Mutations to match the actions
   const mutations = {
     SET_APPROVALS(state, approvals) {
-      state.approvals = approvals;
+      // Ensure approvals is an array
+      state.approvals = Array.isArray(approvals) ? approvals : [];
     },
     SET_PENDING_APPROVALS(state, approvals) {
-      state.pendingApprovals = approvals;
+      // Ensure pendingApprovals is an array
+      state.pendingApprovals = Array.isArray(approvals) ? approvals : [];
     },
     SET_LOADING(state, isLoading) {
-      state.loading = isLoading;
+      state.loading = !!isLoading; // Convert to boolean
     },
     SET_ERROR(state, error) {
       state.error = error;
@@ -55,7 +115,7 @@ const initialState = {
   // Export as namespaced module
   export default {
     namespaced: true,
-    state: initialState,
+    state,
     getters,
     actions,
     mutations
