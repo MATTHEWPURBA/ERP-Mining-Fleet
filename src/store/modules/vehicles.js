@@ -37,15 +37,26 @@ const actions = {
     try {
       const response = await VehicleService.getVehicles(page, filters);
 
-      commit('SET_VEHICLES', response.data.data);
-      commit('SET_PAGINATION', {
-        current_page: response.data.current_page,
-        per_page: response.data.per_page,
-        total: response.data.total,
-      });
+          // Extract vehicles array and pagination data
+    const vehicles = response.data.data || [];
+    const pagination = {
+      current_page: response.data.current_page,
+      per_page: response.data.per_page,
+      total: response.data.total
+    };
+    
+    commit('SET_VEHICLES', vehicles);
+    commit('SET_PAGINATION', pagination);
 
-      return Promise.resolve(response.data);
-    } catch (error) {
+
+    // Return a properly structured object that matches component expectations
+    return Promise.resolve({
+      data: vehicles,
+      ...pagination
+    });
+
+
+  } catch (error) {
       commit('SET_ERROR', error.response?.data?.message || 'Failed to fetch vehicles');
       dispatch('setError', error.response?.data?.message || 'Failed to fetch vehicles', { root: true });
       return Promise.reject(error);

@@ -2,7 +2,7 @@
     <div>
       <PageHeader 
         :title="vehicle ? `Vehicle: ${vehicle.registration_no}` : 'Vehicle Details'"
-        :subtitle="vehicle ? `${vehicle.vehicleType.name} at ${vehicle.location.name}` : 'Loading...'"
+        :subtitle="vehicle ? `${vehicle.vehicle_type.name} at ${vehicle.location.name}` : 'Loading...'"
       >
         <template #actions>
           <div class="space-x-2">
@@ -71,7 +71,7 @@
                     Vehicle Type
                   </dt>
                   <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                    {{ vehicle.vehicleType.name }}
+                    {{ vehicle.vehicle_type.name }}
                   </dd>
                 </div>
                 
@@ -80,7 +80,7 @@
                     Capacity
                   </dt>
                   <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                    {{ vehicle.vehicleType.capacity }} passengers
+                    {{ vehicle.vehicle_type.capacity }} passengers
                   </dd>
                 </div>
                 
@@ -112,7 +112,7 @@
                     Description
                   </dt>
                   <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                    {{ vehicle.vehicleType.description || 'No description available' }}
+                    {{ vehicle.vehicle_type.description || 'No description available' }}
                   </dd>
                 </div>
               </dl>

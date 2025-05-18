@@ -12,8 +12,8 @@
     <div class="mt-6">
       <DataTable :columns="columns" :data="vehicles" :loading="loading" :pagination="pagination" :filters="filters" row-clickable @row-click="viewVehicle" @page-change="changePage" @search="onSearch" @filter="onFilter" :get-row-class="getRowClass">
         <!-- Vehicle type formatter -->
-        <template #[`cell(vehicleType.name)`]="{ item }">
-          {{ item.vehicleType.name }}
+        <template #[`cell(vehicle_type.name)`]="{ item }">
+          {{ item.vehicle_type.name }}
         </template>
 
         <!-- Location formatter -->
@@ -36,7 +36,7 @@
 
         <!-- Actions column -->
         <template #actions="{ item }">
-          <div class="flex items-center space-x-3">
+          <div v-if="item && item.id" class="flex items-center space-x-3">
             <router-link :to="`/vehicles/${item.id}`" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300" title="View vehicle details">
               <span class="material-icons text-sm">visibility</span>
             </router-link>
@@ -145,7 +145,7 @@ export default {
 
     const columns = [
       { key: 'registration_no', label: 'Registration No', sortable: true },
-      { key: 'vehicleType.name', label: 'Type', sortable: true },
+      { key: 'vehicle_type.name', label: 'Type', sortable: true },
       { key: 'location.name', label: 'Location', sortable: true },
       { key: 'status', label: 'Status', sortable: true },
       { key: 'is_rented', label: 'Rented', sortable: true },
@@ -176,6 +176,7 @@ export default {
       } catch (error) {
         console.error('Error fetching vehicles:', error);
         store.dispatch('setError', 'Failed to fetch vehicles');
+        vehicles.value = [];  // Important: Initialize as empty array
       } finally {
         loading.value = false;
       }
