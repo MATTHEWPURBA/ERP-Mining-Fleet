@@ -82,4 +82,4 @@ const BookingService = {
 
 export default BookingService;
 
-// src/services/BookingService.js
+// frontend/src/services/BookingService.js

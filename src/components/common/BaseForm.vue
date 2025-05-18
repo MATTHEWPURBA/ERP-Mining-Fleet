@@ -76,3 +76,5 @@
     }
   };
   </script>
+
+<!-- frontend/src/components/common/BaseForm.vue (Updated) -->

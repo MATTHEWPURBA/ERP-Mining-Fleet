@@ -73,4 +73,4 @@ const initialState = {
     mutations
   };
 
-  // src/store/modules/maintenance.js
+  // frontend/src/store/modules/maintenance.js

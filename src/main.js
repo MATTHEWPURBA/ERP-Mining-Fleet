@@ -65,4 +65,4 @@ app.use(router);
 // Mount the app
 app.mount('#app');
 
-// src/main.js
+// frontend/src/main.js

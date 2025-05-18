@@ -31,4 +31,4 @@ main {
 }
 </style>
 
-<!-- //src/layouts/DefaultLayout.vue -->
+<!-- frontend/src/layouts/DefaultLayout.vue -->

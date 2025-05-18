@@ -92,4 +92,4 @@ export const authGuard = (to, from, next) => {
   
 
 
-  // src/utils/auth.js
+  // frontend/src/utils/auth.js

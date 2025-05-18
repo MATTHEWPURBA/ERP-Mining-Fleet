@@ -157,4 +157,4 @@ export default {
 
 
 
-// src/store/modules/auth.js
+// frontend/src/store/modules/auth.js

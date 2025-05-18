@@ -389,3 +389,6 @@
     }
   };
   </script>
+
+
+<!-- frontend/src/components/common/DataTable.vue -->

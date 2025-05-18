@@ -68,4 +68,4 @@ const initialState = {
     mutations
   };
 
-// src/store/modules/reports.js
+// frontend/src/store/modules/reports.js

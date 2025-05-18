@@ -55,4 +55,4 @@ const LocationService = {
 
 export default LocationService;
 
-// src/services/LocationService.js
+// frontend/src/services/LocationService.js

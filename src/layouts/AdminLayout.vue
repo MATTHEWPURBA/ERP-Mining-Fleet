@@ -138,3 +138,6 @@ export default {
   z-index: 100;
 }
 </style>
+
+
+<!-- frontend/src/layouts/AdminLayout.vue (Original) -->

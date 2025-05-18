@@ -60,4 +60,4 @@ const AuthService = {
 
 export default AuthService;
 
-// src/services/AuthService.js
+// frontend/src/services/AuthService.js

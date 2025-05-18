@@ -56,4 +56,4 @@ export default {
 </script>
 
 <!-- Note: We don't include the navbar in the auth layout since users aren't logged in yet -->
-<!-- src/layouts/AuthLayout.vue (Updated, but without navbar since users aren't authenticated) -->
+<!-- frontend/src/layouts/AuthLayout.vue (Updated, but without navbar since users aren't authenticated) -->

@@ -59,4 +59,4 @@ export const BarChart = defineComponent({
   }
 });
 
-// src/services/chart-components.js
+// frontend/src/services/chart-components.js

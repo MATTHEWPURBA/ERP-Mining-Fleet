@@ -43,4 +43,4 @@ p {
   text-align: left;
 }
 </style>
-<!-- src/components/common/PageHeader.vue (Updated) -->
+<!-- frontend/src/components/common/PageHeader.vue (Updated) -->

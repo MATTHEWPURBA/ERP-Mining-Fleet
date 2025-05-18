@@ -261,4 +261,4 @@ const router = createRouter({
 
 export default router;
 
-// src/router/index.js
+// frontend/src/router/index.js

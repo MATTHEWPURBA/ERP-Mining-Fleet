@@ -10,22 +10,22 @@ const initialState = {
   pagination: {
     current_page: 1,
     per_page: 15,
-    total: 0
+    total: 0,
   },
   loading: false,
-  error: null
+  error: null,
 };
 
 // Getters
 const getters = {
-  getAllVehicles: state => state.vehicles,
-  getVehicle: state => state.vehicle,
-  getVehicleBookings: state => state.vehicleBookings,
-  getVehicleMaintenance: state => state.vehicleMaintenance,
-  getVehicleFuelLogs: state => state.vehicleFuelLogs,
-  getPagination: state => state.pagination,
-  isLoading: state => state.loading,
-  getError: state => state.error
+  getAllVehicles: (state) => state.vehicles,
+  getVehicle: (state) => state.vehicle,
+  getVehicleBookings: (state) => state.vehicleBookings,
+  getVehicleMaintenance: (state) => state.vehicleMaintenance,
+  getVehicleFuelLogs: (state) => state.vehicleFuelLogs,
+  getPagination: (state) => state.pagination,
+  isLoading: (state) => state.loading,
+  getError: (state) => state.error,
 };
 
 // Actions
@@ -33,17 +33,17 @@ const actions = {
   // Fetch vehicles with optional filters
   async fetchVehicles({ commit, dispatch }, { page = 1, filters = {} } = {}) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.getVehicles(page, filters);
-      
+
       commit('SET_VEHICLES', response.data.data);
       commit('SET_PAGINATION', {
         current_page: response.data.current_page,
         per_page: response.data.per_page,
-        total: response.data.total
+        total: response.data.total,
       });
-      
+
       return Promise.resolve(response.data);
     } catch (error) {
       commit('SET_ERROR', error.response?.data?.message || 'Failed to fetch vehicles');
@@ -53,11 +53,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Fetch a single vehicle by ID
   async fetchVehicle({ commit, dispatch }, id) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.getVehicle(id);
       commit('SET_VEHICLE', response.data);
@@ -70,14 +70,14 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Create a new vehicle
   async createVehicle({ commit, dispatch }, vehicleData) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.createVehicle(vehicleData);
-      
+
       dispatch('setSuccessMessage', 'Vehicle created successfully', { root: true });
       return Promise.resolve(response.data);
     } catch (error) {
@@ -88,19 +88,19 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Update an existing vehicle
   async updateVehicle({ commit, dispatch, state }, { id, vehicleData }) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.updateVehicle(id, vehicleData);
-      
+
       // Update the vehicle in state if it's the current one
       if (state.vehicle && state.vehicle.id === id) {
         commit('SET_VEHICLE', response.data.vehicle);
       }
-      
+
       dispatch('setSuccessMessage', 'Vehicle updated successfully', { root: true });
       return Promise.resolve(response.data);
     } catch (error) {
@@ -111,17 +111,17 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Delete a vehicle
   async deleteVehicle({ commit, dispatch }, id) {
     commit('SET_LOADING', true);
-    
+
     try {
       await VehicleService.deleteVehicle(id);
-      
+
       // Remove vehicle from state
       commit('REMOVE_VEHICLE', id);
-      
+
       dispatch('setSuccessMessage', 'Vehicle deleted successfully', { root: true });
       return Promise.resolve();
     } catch (error) {
@@ -132,11 +132,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Fetch vehicle bookings
   async fetchVehicleBookings({ commit, dispatch }, vehicleId) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.getVehicleBookings(vehicleId);
       commit('SET_VEHICLE_BOOKINGS', response.data);
@@ -149,11 +149,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Fetch vehicle maintenance records
   async fetchVehicleMaintenance({ commit, dispatch }, vehicleId) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.getVehicleMaintenance(vehicleId);
       commit('SET_VEHICLE_MAINTENANCE', response.data);
@@ -166,11 +166,11 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Fetch vehicle fuel logs
   async fetchVehicleFuelLogs({ commit, dispatch }, vehicleId) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.getVehicleFuelLogs(vehicleId);
       commit('SET_VEHICLE_FUEL_LOGS', response.data);
@@ -183,17 +183,17 @@ const actions = {
       commit('SET_LOADING', false);
     }
   },
-  
+
   // Check vehicle availability for a date range
   async checkVehicleAvailability({ commit, dispatch }, filters) {
     commit('SET_LOADING', true);
-    
+
     try {
       const response = await VehicleService.checkAvailability(filters);
-          // Add logging to debug the response
-    console.log('API response for vehicle availability:', response);
-    // Ensure we're returning the data in a consistent format
-    return Promise.resolve(response.data || []);
+      // Add logging to debug the response
+      console.log('API response for vehicle availability:', response);
+      // Ensure we're returning the data in a consistent format
+      return Promise.resolve(response.data || []);
     } catch (error) {
       commit('SET_ERROR', error.response?.data?.message || 'Failed to check vehicle availability');
       dispatch('setError', error.response?.data?.message || 'Failed to check vehicle availability', { root: true });
@@ -201,10 +201,7 @@ const actions = {
     } finally {
       commit('SET_LOADING', false);
     }
-  }
-
-
-  
+  },
 };
 
 // Mutations
@@ -228,8 +225,8 @@ const mutations = {
     state.pagination = pagination;
   },
   REMOVE_VEHICLE(state, id) {
-    state.vehicles = state.vehicles.filter(vehicle => vehicle.id !== id);
-    
+    state.vehicles = state.vehicles.filter((vehicle) => vehicle.id !== id);
+
     // Clear current vehicle if it's the deleted one
     if (state.vehicle && state.vehicle.id === id) {
       state.vehicle = null;
@@ -240,7 +237,7 @@ const mutations = {
   },
   SET_ERROR(state, error) {
     state.error = error;
-  }
+  },
 };
 
 export default {
@@ -248,7 +245,7 @@ export default {
   state: initialState,
   getters,
   actions,
-  mutations
+  mutations,
 };
 
-// src/store/modules/vehicles.js
+// frontend/src/store/modules/vehicles.js

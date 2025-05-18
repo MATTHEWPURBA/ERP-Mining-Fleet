@@ -56,4 +56,4 @@ axios.interceptors.response.use(
   }
 );
 
-// src/services/interceptors.js
+// frontend/src/services/interceptors.js
